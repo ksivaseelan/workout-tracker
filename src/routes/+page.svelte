@@ -1,60 +1,34 @@
-<script lang="ts">
+<script lang="ts"> 
 	import { dev } from '$app/environment';
 	import { Replicache, type WriteTransaction } from 'replicache';
 	import { flip } from 'svelte/animate';
-	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Checkbox } from '$lib/components/ui/checkbox';
-
-	import { Trash2 } from 'lucide-svelte';
-
-	//TODO: get add set form inside each exercise card working
-
-	//define Exercise type
-	// type Exercise = {
-	// 	id: number;
-	// 	name: string;
-	// 	sets: string;
-	//     reps: string;
-	//     weight: string;
-	// 	deleted: boolean;
-	// 	createdAt: string;
-	// 	updatedAt: string;
-	// };
+	import { nanoid } from 'nanoid';
 
 	type Exercise = {
-		id: number;
+		id: string;
 		name: string;
-		sets: Set[];
 		deleted: boolean;
-		completed: boolean;
+		sets: Set[];
 		createdAt: string;
 		updatedAt: string;
+		completed: boolean;
 	};
 
 	type Set = {
-		id: number;
+		id: string;
 		number: number;
 		reps: string;
 		weight: string;
-		warmup: boolean;
+		completed: boolean;
 	};
 
-	//define state
 	let exercises: Exercise[] = $state([]);
-	let sets: Set[] = $state([]);
 	let form_state = $state({ name: '' });
-	let set_form_state = $state({ reps: '', weight: '' });
 	let name = dev ? 'dev:exercises:userId' : 'exercises:userId';
 
-	//replicache constructor
 	let rep = new Replicache({
 		name,
 		licenseKey: import.meta.env.VITE_REP_LICENSE,
-		//functions that run when changing replicache state
-		// Runs locally first and if there is a server it syncs later
 		mutators: {
 			create_exercise: async (tx: WriteTransaction, args: Exercise) => {
 				const key = `exercises/${args.id}`;
@@ -64,134 +38,154 @@
 				const key = `exercises/${args.id}`;
 				await tx.del(key);
 			},
-			add_set: async (tx: WriteTransaction, args: Exercise) => {
+			toggle_exercise: async (tx: WriteTransaction, args: Exercise) => {
 				const key = `exercises/${args.id}`;
 				await tx.set(key, args);
-				console.log(args);
+			},
+			update_exercise: async (tx: WriteTransaction, args: Exercise) => {
+				const key = `exercises/${args.id}`;
+				await tx.set(key, args);
 			}
 		}
 	});
 
 	$effect(() => {
-		rep.subscribe(
+		return rep.subscribe(
 			async (tx) => {
-				const exercise_items = await tx.scan({ prefix: 'exercises/' }).entries().toArray();
-				return exercise_items
+				const exercises_items = await tx.scan({ prefix: 'exercises/' }).entries().toArray();
+				return exercises_items
 					.map(([_, values]) => values as Exercise)
 					.filter((exercise) => !exercise.deleted);
 			},
-			(items) => {
-				console.log(items);
-				exercises = items.sort((a, b) =>
-					a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0
-				);
+			(items: Exercise[]) => {
+				exercises = items
+					.sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0))
+					.sort((a, b) => (a.completed === b.completed ? 0 : a.completed ? 1 : -1));
 			}
 		);
 	});
 
-	//on form submit function
-	async function createExercise() {
-		await rep.mutate.create_exercise({
-			id: new Date().getTime(),
+	function toggle(exercise: Exercise) {
+		rep.mutate.toggle_exercise({
+			...exercise,
+			completed: !exercise.completed
+		});
+	}
+
+	function onsubmit(e: SubmitEvent) {
+		e.preventDefault();
+		rep.mutate.create_exercise({
+			id: nanoid(),
 			name: form_state.name,
 			sets: [],
 			deleted: false,
-			completed: false,
 			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString()
+			updatedAt: new Date().toISOString(),
+			completed: false
 		});
 		form_state.name = '';
 	}
 
-	//delete function
-	async function remove(exercise: Exercise) {
-		rep.mutate.delete_exercise({
-			...exercise,
-			deleted: !exercise.deleted
-		});
-	}
-
-	//add set function
-	async function addSet(exercise: Exercise) {
-		await rep.mutate.add_set({
-			...exercise,
-			sets: [
-				...exercise.sets,
-				{
-					id: new Date().getTime(),
-					number: exercise.sets.length + 1,
-					warmup: false,
-					reps: set_form_state.reps,
-					weight: set_form_state.weight
-				}
-			]
-		});
+	function updateSetNumbers(sets: Set[]) {
+		return sets.map((set, index) => ({ ...set, number: index + 1 }));
 	}
 </script>
 
-<Card.Root class="w-[350px]">
-	<Card.Header>
-		<Card.Title>Add Exercise</Card.Title>
-		<Card.Description>Track your exercise</Card.Description>
-	</Card.Header>
-	<Card.Content>
-		<form method="post">
-			<div class="grid w-full items-center gap-4">
-				<div class="flex flex-col space-y-1.5">
-					<Label for="name">Exercise Name</Label>
-					<Input type="text" name="name" id="name" bind:value={form_state.name} />
-				</div>
-			</div>
-		</form>
-	</Card.Content>
-	<Card.Footer>
-		<div class="grid w-full">
-			<div class="flex justify-end">
-				<Button onclick={() => createExercise()}>+ Add Exercise</Button>
-			</div>
-		</div>
-	</Card.Footer>
-</Card.Root>
+<h1>Workout Tracker</h1>
+<form method="POST" {onsubmit} id="exerciseForm">
+	<label for="name">Exercise:</label>
+	<input type="text" name="name" id="name" bind:value={form_state.name} />
+	<button type="submit">+ Add</button>
+</form>
 
 <ul>
 	{#each exercises as exercise (exercise.id)}
-		<li animate:flip={{ duration: 200 }}>
-			<Card.Root class="w-[500px]">
-				<Card.Header>
-					<div class="grid w-full items-center">
-						<div class="flex justify-between">
-							<Card.Title>{exercise.name}</Card.Title>
-							<Button variant="ghost" onclick={() => remove(exercise)}>
-								<Trash2 />
-							</Button>
-						</div>
-					</div>
-				</Card.Header>
-				<Card.Content>
-					<form method="post">
-						<div class="grid w-full grid-cols-4 items-center gap-4">
-							<div class="flex flex-col space-y-1.5">
-								<Label for="reps">Reps</Label>
-								<Input type="text" name="reps" id="reps" bind:value={set_form_state.reps} />
-							</div>
-							<div class="flex flex-col space-y-1.5">
-								<Label for="weight">Weight</Label>
-								<Input type="text" name="weight" id="weight" bind:value={set_form_state.weight} />
-							</div>
-							<div class="flex justify-center">
-								<Checkbox class="h-6 w-6" />
-							</div>
-						</div>
-					</form>
-				</Card.Content>
-				<Card.Footer>
-					<div class="grid w-full">
-						<div class="flex justify-center">
-							<Button onclick={() => addSet(exercise)}>+ Add Set</Button>
-						</div>
-					</div>
-				</Card.Footer>
-			</Card.Root>
+		<li animate:flip={{ duration: 200 }} class:completed={exercise.completed}>
+			<span>
+				<h3>{exercise.name}</h3>
+				<form
+					method="POST"
+					onsubmit={(e) => {
+						e.preventDefault();
+
+						const form = e.target as HTMLFormElement;
+						const formData = new FormData(form);
+
+						const set = exercise.sets.length + 1;
+						const weight = formData.get('weight') as string;
+						const reps = formData.get('reps') as string;
+
+						const updatedSets = [
+							...exercise.sets,
+							{
+								id: nanoid(),
+								number: set,
+								reps: reps,
+								weight: weight,
+								completed: false
+							}
+						];
+
+						rep.mutate.update_exercise({
+							...exercise,
+							sets: updateSetNumbers(updatedSets)
+						});
+
+						form.reset();
+					}}
+				>
+					<label for="weight">weight</label>
+					<input type="text" name="weight" id="weight-{exercise.id}" />
+					<label for="reps">reps</label>
+					<input type="text" name="reps" id="reps-{exercise.id}" />
+					<button type="submit">+ Add</button>
+				</form>
+
+				{#each exercise.sets as set (set.id)}
+					<div>Set number: {set.number}</div>
+					<div>Set reps: {set.reps}</div>
+					<div>Set weight: {set.weight}</div>
+					<button
+						class="delete"
+						onclick={() => {
+							const updatedSets = exercise.sets.filter((s) => s.id !== set.id);
+
+							rep.mutate.update_exercise({
+								...exercise,
+								sets: updateSetNumbers(updatedSets)
+							});
+						}}
+					>
+						x set
+					</button>
+				{/each}
+				<button class="delete" onclick={() => rep.mutate.delete_exercise(exercise)}>
+					x exercise
+				</button>
+			</span>
+			<button class="check" onclick={() => toggle(exercise)}>
+				<svg xmlns="http://www.w3.org/2000/svg" width="40px" height="100%" viewBox="0 0 32 32"
+					><title>c-check</title><g fill="var(--fg)" stroke-linejoin="miter" stroke-linecap="butt"
+						><circle
+							cx="16"
+							cy="16"
+							r="14"
+							fill="none"
+							stroke="var(--fg)"
+							stroke-linecap="square"
+							stroke-miterlimit="10"
+							stroke-width="2"
+						></circle><polyline
+							points="9 17 13 21.5 23 10"
+							fill="none"
+							stroke="var(--fg)"
+							stroke-linecap="square"
+							stroke-miterlimit="10"
+							stroke-width="2"
+						></polyline></g
+					></svg
+				>
+			</button>
 		</li>
 	{/each}
 </ul>
