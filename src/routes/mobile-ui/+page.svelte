@@ -4,10 +4,11 @@
 	import type { DateValue } from '@internationalized/date';
 	import { Button } from '$lib/components/ui/button';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import { SquarePlus } from 'lucide-svelte';
+	import { SquarePlus, Trash2 } from 'lucide-svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { Label } from '$lib/components/ui/label';
 	import { Input } from '$lib/components/ui/input';
+	import * as Table from '$lib/components/ui/table';
 
 	//replicache stuff
 	import { dev } from '$app/environment';
@@ -140,103 +141,103 @@
 	</div>
 
 	<!-- scrollable container -->
-	<ScrollArea class="">
-		<form method="POST" {onsubmit} id="exerciseForm">
-			<label for="name">Exercise:</label>
-			<input type="text" name="name" id="name" bind:value={form_state.name} />
-			<button type="submit">+ Add</button>
-		</form>
+	<ScrollArea>
 		<ul>
 			{#each exercises as exercise (exercise.id)}
 				<li animate:flip={{ duration: 200 }} class:completed={exercise.completed}>
-					<span>
-						<h3>{exercise.name}</h3>
-						<form
-							method="POST"
-							onsubmit={(e) => {
-								e.preventDefault();
+					<Card.Root class="relative">
+						<div class="absolute right-6 top-4">
+							<Button
+								class="h-6 w-6 p-0"
+								variant="destructive"
+								onclick={() => rep.mutate.delete_exercise(exercise)}
+							>
+								<Trash2 size={16}></Trash2>
+							</Button>
+						</div>
+						<Card.Header>
+							<Card.Title>{exercise.name}</Card.Title>
+						</Card.Header>
+						<Card.Content>
+							<Table.Root>
+								<Table.Header>
+									<Table.Row>
+										<Table.Head>Set</Table.Head>
+										<Table.Head>Previous</Table.Head>
+										<Table.Head>Weight</Table.Head>
+										<Table.Head>Reps</Table.Head>
+									</Table.Row>
+								</Table.Header>
+								<Table.Body>
+									{#each exercise.sets as set}
+										<Table.Row>
+											<Table.Cell class="text-center font-medium">{set.number}</Table.Cell>
+											<Table.Cell class="text-center">-</Table.Cell>
+											<Table.Cell class="text-center">
+												<Table.EditableCell value={set.weight} editable={true} />
+											</Table.Cell>
+											<Table.Cell class="text-center">
+												<Table.EditableCell value={set.reps} editable={true} />
+											</Table.Cell>
+											<Table.Cell class="text-center">
+												<Button
+													class="h-6 w-6 p-0"
+													variant="destructive"
+													onclick={() => {
+														const updatedSets = exercise.sets.filter((s) => s.id !== set.id);
 
-								const form = e.target as HTMLFormElement;
-								const formData = new FormData(form);
+														rep.mutate.update_exercise({
+															...exercise,
+															sets: updateSetNumbers(updatedSets)
+														});
+													}}
+												>
+													<Trash2 size={16}></Trash2>
+												</Button>
+											</Table.Cell>
+										</Table.Row>
+									{/each}
+								</Table.Body>
+							</Table.Root>
+							<form
+								method="POST"
+								onsubmit={(e) => {
+									e.preventDefault();
 
-								const set = exercise.sets.length + 1;
-								const weight = formData.get('weight') as string;
-								const reps = formData.get('reps') as string;
+									const form = e.target as HTMLFormElement;
+									const formData = new FormData(form);
 
-								const updatedSets = [
-									...exercise.sets,
-									{
-										id: nanoid(),
-										number: set,
-										reps: reps,
-										weight: weight,
-										completed: false
-									}
-								];
+									const set = exercise.sets.length + 1;
+									const weight = formData.get('weight') as string;
+									const reps = formData.get('reps') as string;
 
-								rep.mutate.update_exercise({
-									...exercise,
-									sets: updateSetNumbers(updatedSets)
-								});
-
-								form.reset();
-							}}
-						>
-							<label for="weight">weight</label>
-							<input type="text" name="weight" id="weight-{exercise.id}" />
-							<label for="reps">reps</label>
-							<input type="text" name="reps" id="reps-{exercise.id}" />
-							<button type="submit">+ Add</button>
-						</form>
-
-						{#each exercise.sets as set (set.id)}
-							<div>Set number: {set.number}</div>
-							<div>Set reps: {set.reps}</div>
-							<div>Set weight: {set.weight}</div>
-							<button
-								class="delete"
-								onclick={() => {
-									const updatedSets = exercise.sets.filter((s) => s.id !== set.id);
+									const updatedSets = [
+										...exercise.sets,
+										{
+											id: nanoid(),
+											number: set,
+											reps: reps,
+											weight: weight,
+											completed: false
+										}
+									];
 
 									rep.mutate.update_exercise({
 										...exercise,
 										sets: updateSetNumbers(updatedSets)
 									});
+
+									form.reset();
 								}}
 							>
-								x set
-							</button>
-						{/each}
-						<button class="delete" onclick={() => rep.mutate.delete_exercise(exercise)}>
-							x exercise
-						</button>
-					</span>
-					<button class="check" onclick={() => toggle(exercise)}>
-						<svg xmlns="http://www.w3.org/2000/svg" width="40px" height="100%" viewBox="0 0 32 32"
-							><title>c-check</title><g
-								fill="var(--fg)"
-								stroke-linejoin="miter"
-								stroke-linecap="butt"
-								><circle
-									cx="16"
-									cy="16"
-									r="14"
-									fill="none"
-									stroke="var(--fg)"
-									stroke-linecap="square"
-									stroke-miterlimit="10"
-									stroke-width="2"
-								></circle><polyline
-									points="9 17 13 21.5 23 10"
-									fill="none"
-									stroke="var(--fg)"
-									stroke-linecap="square"
-									stroke-miterlimit="10"
-									stroke-width="2"
-								></polyline></g
-							></svg
-						>
-					</button>
+								<Label for="weight" class="mb-2">Weight</Label>
+								<Input type="text" name="weight" id="weight-{exercise.id}" />
+								<Label for="reps" class="mb-2">Reps</Label>
+								<Input type="text" name="reps" id="reps-{exercise.id}" />
+								<Button type="submit">+ Add</Button>
+							</form>
+						</Card.Content>
+					</Card.Root>
 				</li>
 			{/each}
 		</ul>
