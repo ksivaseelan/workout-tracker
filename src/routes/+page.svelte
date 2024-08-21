@@ -31,7 +31,7 @@
 		licenseKey: import.meta.env.VITE_REP_LICENSE,
 		mutators: {
 			create_exercise: async (tx: WriteTransaction, args: Exercise) => {
-				const key = `exercises/${args.id}`;
+				const key = `exercises//home/kogul/projects/workout-tracker/src/lib/triplit${args.id}`;
 				await tx.set(key, args);
 			},
 			delete_exercise: async (tx: WriteTransaction, args: Exercise) => {
