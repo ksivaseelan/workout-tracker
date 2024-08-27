@@ -10,6 +10,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
 	import { flip } from 'svelte/animate';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 
 	//triplit stuff
 	import { useQuery } from '@triplit/svelte';
@@ -63,8 +64,6 @@
 	let showAddExerciseForm = $state(false);
 </script>
 
-<!-- svelte-ignore state_referenced_locally -->
-<!-- svelte-ignore state_referenced_locally -->
 <div class="min-h-screen p-4">
 	<h1 class="mb-8 text-center text-2xl font-bold">Workout Tracker</h1>
 	<div class="sticky top-4 z-10 mb-4 text-center">
@@ -106,84 +105,105 @@
 			<ul>
 				{#each exercisesArray as exercise (exercise.id)}
 					<li animate:flip={{ duration: 200 }}>
-						<Card.Root class="relative">
-							<div class="absolute right-6 top-4">
-								<Button
-									class="h-6 w-6 p-0"
-									variant="destructive"
-									onclick={async () => await triplit.delete('exercises', exercise.id)}
-								>
-									<Trash2 size={16}></Trash2>
-								</Button>
-							</div>
-							<Card.Header>
-								<Card.Title>{exercise.name}</Card.Title>
-							</Card.Header>
-							<Card.Content>
-								<Table.Root>
-									<Table.Header>
-										<Table.Row>
-											<Table.Head>Set</Table.Head>
-											<Table.Head>Previous</Table.Head>
-											<Table.Head>Weight</Table.Head>
-											<Table.Head>Reps</Table.Head>
-										</Table.Row>
-									</Table.Header>
-									<Table.Body>
-										{#each exercise.sets as set (set.id)}
+						<AlertDialog.Root>
+							<AlertDialog.Content>
+								<AlertDialog.Header>
+									<AlertDialog.Title>Are you sure?</AlertDialog.Title>
+									<AlertDialog.Description>
+										This action cannot be undone.
+										<br />
+										This will permanently delete the exercise:
+										<strong>{exercise.name}</strong> and its sets.
+									</AlertDialog.Description>
+								</AlertDialog.Header>
+								<AlertDialog.Footer>
+									<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+									<AlertDialog.Action
+										class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+										onclick={async () => await triplit.delete('exercises', exercise.id)}
+									>
+										Continue
+									</AlertDialog.Action>
+								</AlertDialog.Footer>
+							</AlertDialog.Content>
+
+							<Card.Root class="relative">
+								<div class="absolute right-6 top-4">
+									<AlertDialog.Trigger asChild let:builder>
+										<Button builders={[builder]} class="h-6 w-6 p-0" variant="destructive">
+											<Trash2 size={16}></Trash2>
+										</Button>
+									</AlertDialog.Trigger>
+								</div>
+								<Card.Header>
+									<Card.Title>{exercise.name}</Card.Title>
+								</Card.Header>
+								<Card.Content>
+									<Table.Root>
+										<Table.Header>
 											<Table.Row>
-												<Table.Cell class="text-center font-medium">{set.number}</Table.Cell>
-												<Table.Cell class="text-center">-</Table.Cell>
-												<Table.Cell class="text-center">
-													<Table.EditableCell value={set.weight} editable={true} />
-												</Table.Cell>
-												<Table.Cell class="text-center">
-													<Table.EditableCell value={set.reps} editable={true} />
-												</Table.Cell>
-												<Table.Cell class="text-center">
-													<Button
-														class="h-6 w-6 p-0"
-														variant="destructive"
-														onclick={async () => {
-															await triplit.delete('sets', set.id);
-														}}
-													>
-														<Trash2 size={16}></Trash2>
-													</Button>
-												</Table.Cell>
+												<Table.Head>Set</Table.Head>
+												<Table.Head>Previous</Table.Head>
+												<Table.Head>Weight</Table.Head>
+												<Table.Head>Reps</Table.Head>
 											</Table.Row>
-										{/each}
-									</Table.Body>
-								</Table.Root>
-								<form
-									method="POST"
-									onsubmit={async (e) => {
-										e.preventDefault();
+										</Table.Header>
+										<Table.Body>
+											{#each exercise.sets as set (set.id)}
+												<Table.Row>
+													<Table.Cell class="text-center font-medium">{set.number}</Table.Cell>
+													<Table.Cell class="text-center">-</Table.Cell>
+													<Table.Cell class="text-center">
+														<Table.EditableCell value={set.weight} editable={true} />
+													</Table.Cell>
+													<Table.Cell class="text-center">
+														<Table.EditableCell value={set.reps} editable={true} />
+													</Table.Cell>
+													<Table.Cell class="text-center">
+														<Button
+															class="h-6 w-6 p-0"
+															variant="destructive"
+															onclick={async () => {
+																await triplit.delete('sets', set.id);
+															}}
+														>
+															<Trash2 size={16}></Trash2>
+														</Button>
+													</Table.Cell>
+												</Table.Row>
+											{/each}
+										</Table.Body>
+									</Table.Root>
+									<form
+										method="POST"
+										onsubmit={async (e) => {
+											e.preventDefault();
 
-										const form = e.target as HTMLFormElement;
-										const formData = new FormData(form);
+											const form = e.target as HTMLFormElement;
+											const formData = new FormData(form);
 
-										const weight = formData.get('weight') as string;
-										const reps = formData.get('reps') as string;
+											const weight = formData.get('weight') as string;
+											const reps = formData.get('reps') as string;
 
-										await triplit.insert('sets', {
-											weight: weight,
-											reps: reps,
-											completed: false,
-											exercise_id: exercise.id
-										});
+											await triplit.insert('sets', {
+												weight: weight,
+												reps: reps,
+												completed: false,
+												exercise_id: exercise.id
+											});
 
-										form.reset();
-									}}
-								>
-									<Label for="weight" class="mb-2">Weight</Label>
-									<Input type="text" name="weight" id="weight-{exercise.id}" />
-									<Label for="reps" class="mb-2">Reps</Label>
-									<Input type="text" name="reps" id="reps-{exercise.id}" />
-									<Button type="submit">+ Add</Button>
-								</form>
-							</Card.Content>
-						</Card.Root>
+											form.reset();
+										}}
+									>
+										<Label for="weight" class="mb-2">Weight</Label>
+										<Input type="text" name="weight" id="weight-{exercise.id}" />
+										<Label for="reps" class="mb-2">Reps</Label>
+										<Input type="text" name="reps" id="reps-{exercise.id}" />
+										<Button type="submit">+ Add</Button>
+									</form>
+								</Card.Content>
+							</Card.Root>
+						</AlertDialog.Root>
 					</li>
 				{/each}
 			</ul>
