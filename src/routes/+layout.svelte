@@ -6,8 +6,9 @@
 	import { Button } from '$lib/components/ui/button';
 </script>
 
-<div class="min-h-screen w-full flex-col bg-muted/40 p-4">
+<div class="min-h-screen w-full flex flex-col bg-muted/20 p-4">
 	<aside class="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+		<!-- Sidebar component for desktop -->
 		<nav class="flex flex-col items-center gap-4 px-2 sm:py-5">
 			<a
 				href="/"
@@ -34,6 +35,8 @@
 		<header
 			class="sm:border:0 sticky top-0 z-10 flex h-14 w-full items-center gap-4 border-b bg-background px-4 py-4 sm:static sm:h-auto sm:bg-transparent"
 		>
+
+			<!-- Mobile menu  -->
 			<Sheet.Root>
 				<Sheet.Trigger asChild let:builder>
 					<Button builders={[builder]} size="icon" variant="outline" class="sm:hidden">
@@ -60,6 +63,8 @@
 					</nav>
 				</Sheet.Content>
 			</Sheet.Root>
+
+			<h1 class="text-2xl font-bold">Workout Tracker</h1>
 		</header>
 	</div>
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
