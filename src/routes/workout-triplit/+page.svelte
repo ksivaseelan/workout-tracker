@@ -1,16 +1,18 @@
 <script lang="ts">
 	//UI
 	import DatePicker from '$lib/components/ui/date-picker.svelte';
-	import { type DateValue, CalendarDate, today, getLocalTimeZone } from '@internationalized/date';
+	import { type DateValue, today, getLocalTimeZone } from '@internationalized/date';
 	import { Button } from '$lib/components/ui/button';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import { SquarePlus, Trash2 } from 'lucide-svelte';
+	import { SquarePlus, Trash2, Dumbbell, PanelLeft, Home } from 'lucide-svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { Label } from '$lib/components/ui/label';
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
 	import { flip } from 'svelte/animate';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import * as Sheet from '$lib/components/ui/sheet';
 
 	//triplit stuff
 	import { useQuery } from '@triplit/svelte';
@@ -45,13 +47,6 @@
 			: []
 	);
 
-	// function toggle(exercise: Exercise) {
-	// 	rep.mutate.toggle_exercise({
-	// 		...exercise,
-	// 		completed: !exercise.completed
-	// 	});
-	// }
-
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
 		await triplit.insert('exercises', {
@@ -64,7 +59,7 @@
 	let showAddExerciseForm = $state(false);
 </script>
 
-<div class="min-h-screen p-4">
+
 	<h1 class="mb-8 text-center text-2xl font-bold">Workout Tracker</h1>
 	<div class="sticky top-4 z-10 mb-4 text-center">
 		<DatePicker bind:value />
@@ -218,4 +213,4 @@
 			}}><SquarePlus></SquarePlus> <span class="text-lg">Exercise</span></Button
 		>
 	</div>
-</div>
+
