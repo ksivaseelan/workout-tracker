@@ -11,13 +11,6 @@
 		createdAt: number;
 	}
 
-	interface Todo {
-		id: string;
-		text: string;
-		done: boolean;
-		createdAt: number;
-	}
-
 	type Schema = {
 		todos: Todo;
 	};
@@ -26,7 +19,7 @@
 
 	let todos: Todo[] = $state([]);
 	let error: string | null = $state(null);
-	
+
 	// query instantDB data
 	$effect(() => {
 		db.subscribeQuery({ todos: {} }, (resp) => {
@@ -40,7 +33,6 @@
 		});
 	});
 
-	
 	function addTodo(text: string) {
 		db.transact(
 			tx.todos[id()].update({
