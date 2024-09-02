@@ -36,6 +36,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@instantdb/core": "^0.12.14",
     "@internationalized/date": "^3.5.5",
     "@triplit/client": "^0.4.6",
     "@triplit/svelte": "^0.1.63",
