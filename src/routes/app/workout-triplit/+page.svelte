@@ -17,7 +17,7 @@
 	//triplit stuff
 	import { useQuery } from '@triplit/svelte';
 	import { triplit } from '@/triplit/client';
-	import { type Exercise, type Set } from '../../../triplit/schema';
+	import { type Exercise, type Set } from '../../../../triplit/schema';
 
 	//selected date
 	let value: DateValue = $state(today(getLocalTimeZone()));

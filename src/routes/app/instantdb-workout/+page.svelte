@@ -171,9 +171,9 @@
 									</Table.Row>
 								</Table.Header>
 								<Table.Body>
-									{#each exercise.sets as set (set.id)}
-										<Table.Row>
-											<Table.Cell class=" text-sm font-bold">{set.number}</Table.Cell>
+									{#each exercise.sets as set, i (set.id)}
+										<Table.Row >
+											<Table.Cell class=" text-sm font-bold">{i + 1}</Table.Cell>
 											<Table.Cell class=" text-sm">-</Table.Cell>
 											<Table.Cell class="text-sm">
 												{set.weight}

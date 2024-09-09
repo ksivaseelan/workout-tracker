@@ -20,7 +20,7 @@
 			<Tooltip.Root>
 				<Tooltip.Trigger asChild let:builder>
 					<a
-						href="/workout-triplit"
+						href="/app/instantdb-workout"
 						class="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
 					>
 						<Dumbbell class="h-5 w-5" />
@@ -54,7 +54,7 @@
 							<span class="sr-only">Home</span>
 						</a>
 						<a
-							href="/workout-triplit"
+							href="/app/instantdb-workout"
 							class="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
 						>
 							<Dumbbell class="h-5 w-5" />
