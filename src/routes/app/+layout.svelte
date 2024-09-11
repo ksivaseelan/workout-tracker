@@ -2,7 +2,7 @@
 	import { db } from '$lib/instantdb/db';
 	import { goto } from '$app/navigation';
 
-	let children = $props();
+	let {children } = $props();
 
 	let isLoggedin = $state(false);
 

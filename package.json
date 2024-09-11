@@ -39,6 +39,7 @@
   "dependencies": {
     "@instantdb/core": "^0.12.14",
     "@internationalized/date": "^3.5.5",
+    "@sveltejs/enhanced-img": "^0.3.4",
     "@triplit/client": "^0.4.6",
     "@triplit/svelte": "^0.1.63",
     "bits-ui": "^0.21.13",

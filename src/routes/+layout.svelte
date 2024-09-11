@@ -5,7 +5,7 @@
 	import * as Sheet from '$lib/components/ui/sheet';
 	import { Button } from '$lib/components/ui/button';
 
-	let children = $props();
+	let { children } = $props();
 </script>
 
 <div class="flex min-h-screen w-full flex-col bg-muted/20 p-4">
@@ -64,8 +64,12 @@
 					</nav>
 				</Sheet.Content>
 			</Sheet.Root>
-
-			<h1 class="text-2xl font-bold">Power Track</h1>
+			<enhanced:img
+				src="/src/lib/images/logo-transparent.png"
+				class="h-14 w-14"
+				alt="Power Track Logo"
+			/>
+			<h1 class="text-2xl font-bold">PowerTrack</h1>
 		</header>
 	</div>
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
