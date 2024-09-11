@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	//UI
 	import LoaderCircle from 'lucide-svelte/icons/loader-circle';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -36,6 +38,7 @@
 			if (auth.user) {
 				isLoggedin = true;
 				user = auth.user;
+				goto('/app/home');
 			} else if (auth.error) {
 				error = auth.error.message;
 			}
@@ -125,9 +128,7 @@
 		</Card.Content>
 		<Card.Footer>
 			{#if isMagicCodeSent}
-				<Button disabled={!validateCode().success} class="w-full" onclick={signIn}>
-					Sign In
-				</Button>
+				<Button disabled={!validateCode().success} class="w-full" onclick={signIn}>Sign In</Button>
 			{:else}
 				<Button disabled={!validateEmail().success} class="w-full" onclick={sendCode}>
 					Send Code
