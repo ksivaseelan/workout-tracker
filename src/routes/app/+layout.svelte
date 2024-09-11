@@ -2,9 +2,10 @@
 	import { db } from '$lib/instantdb/db';
 	import { goto } from '$app/navigation';
 
+	let children = $props();
 
 	let isLoggedin = $state(false);
-	
+
 	$effect(() => {
 		db.subscribeAuth((auth) => {
 			if (auth.user) {
@@ -17,5 +18,5 @@
 </script>
 
 {#if isLoggedin}
-	<slot class="md:ml-16" />
+	{@render children()}
 {/if}

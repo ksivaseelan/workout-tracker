@@ -4,6 +4,8 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import { Button } from '$lib/components/ui/button';
+
+	let children = $props();
 </script>
 
 <div class="flex min-h-screen w-full flex-col bg-muted/20 p-4">
@@ -67,6 +69,6 @@
 		</header>
 	</div>
 	<main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-		<slot></slot>
+		{@render children()}
 	</main>
 </div>
