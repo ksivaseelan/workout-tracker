@@ -1,6 +1,8 @@
 <script lang="ts">
 	//instantdb
 	import { init, tx, id } from '@instantdb/core';
+	import { PUBLIC_INSTANTDB_DEV_APP_ID, PUBLIC_INSTANTDB_PROD_APP_ID } from '$env/static/public';
+	import { dev } from '$app/environment';
 
 	//UI
 	import DatePicker from '$lib/components/ui/date-picker.svelte';
@@ -13,10 +15,9 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
 	import { flip } from 'svelte/animate';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 
-	const APP_ID = 'efdf7751-de2d-41d2-954c-4b89523fb652';
+	const APP_ID = dev ? PUBLIC_INSTANTDB_DEV_APP_ID : PUBLIC_INSTANTDB_PROD_APP_ID;
 
 	interface Exercise {
 		id: string;
@@ -167,7 +168,10 @@
 									</DropdownMenu.Trigger>
 									<DropdownMenu.Content class="w-32">
 										<DropdownMenu.Group>
-											<DropdownMenu.Item class="bg-destructive" onclick={() => deleteExercise(exercise.id)}>
+											<DropdownMenu.Item
+												class="bg-destructive"
+												onclick={() => deleteExercise(exercise.id)}
+											>
 												<Trash2 class="mr-2 h-4 w-4" />
 												<span>Delete</span>
 											</DropdownMenu.Item>

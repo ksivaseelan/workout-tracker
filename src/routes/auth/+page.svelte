@@ -11,13 +11,15 @@
 
 	//InstantDB
 	import { type User, init } from '@instantdb/core';
+	import { PUBLIC_INSTANTDB_DEV_APP_ID, PUBLIC_INSTANTDB_PROD_APP_ID } from '$env/static/public';
+	import { dev } from '$app/environment';
 
 	//valibot
 	import { object, string, email, pipe, length, nonEmpty } from 'valibot';
 
 	import * as v from 'valibot';
 
-	const APP_ID = 'efdf7751-de2d-41d2-954c-4b89523fb652';
+	const APP_ID = dev ? PUBLIC_INSTANTDB_DEV_APP_ID : PUBLIC_INSTANTDB_PROD_APP_ID;
 
 	const db = init({ appId: APP_ID });
 
@@ -136,15 +138,4 @@
 			{/if}
 		</Card.Footer>
 	</Card.Root>
-
-	{#if isLoggedin}
-		<div>Logged in as {user?.email}</div>
-	{/if}
-
-	<button
-		onclick={() => {
-			db.auth.signOut();
-		}}
-		id="sign-out-button">Sign out</button
-	>
 </div>
