@@ -1,6 +1,5 @@
 import { i } from '@instantdb/core';
 
-
 const INSTANT_APP_ID = '3cbf9472-9151-4760-b68b-81926ba0cbad';
 
 const graph = i.graph(
@@ -16,6 +15,18 @@ const graph = i.graph(
 			reps: i.string(),
 			completed: i.boolean(),
 			createdAt: i.string()
+		}),
+		performanceGoals: i.entity({
+			category: i.string(),
+			target: i.string(),
+			frequency: i.string(),
+			timeFrame: i.string()
+		}),
+		habitGoals: i.entity({
+			category: i.string(),
+			target: i.string(),
+			frequency: i.string(),
+			duration: i.string()
 		})
 	},
 	{

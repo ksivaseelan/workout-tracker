@@ -10,18 +10,13 @@
 	import { cn } from '$lib/utils';
 
 	//InstantDB
-	import { type User, init } from '@instantdb/core';
-	import { PUBLIC_INSTANTDB_DEV_APP_ID, PUBLIC_INSTANTDB_PROD_APP_ID } from '$env/static/public';
-	import { dev } from '$app/environment';
+	import { db } from '$lib/instantdb/db';
+	import {type User} from '@instantdb/core';
 
 	//valibot
 	import { object, string, email, pipe, length, nonEmpty } from 'valibot';
 
 	import * as v from 'valibot';
-
-	const APP_ID = dev ? PUBLIC_INSTANTDB_DEV_APP_ID : PUBLIC_INSTANTDB_PROD_APP_ID;
-
-	const db = init({ appId: APP_ID });
 
 	let emailInput = $state('');
 
